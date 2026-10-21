@@ -59,6 +59,8 @@
 
 ## 2. Windows 11 直接使用
 
+> 最新 Windows 离线包与校验文件请在本仓库的 [Releases](https://github.com/lirunwen/hengce-workbench/releases/latest) 页面下载。
+
 ### 方式 A：便携运行
 1. 解压 `HengCeWorkbench-Windows-x64-v1.0.0.zip`（不要只复制压缩包中的部分文件）。
 2. 双击 `Start-HengCe.vbs`。
