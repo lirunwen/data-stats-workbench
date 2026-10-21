@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#123b31">
+  <title>衡策 · 经营数据工作台</title>
+  <link rel="icon" href="/static/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3.5A2.5 2.5 0 0 0 6.5 21h11a2.5 2.5 0 0 0 2.5-2.5V15"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 4v4.5H8"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5"/><path d="M4 19.5h16"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5L20 6.5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 21 20H3L12 3.5Z"/><path d="M12 9v5"/><circle cx="12" cy="17.2" r=".8" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="7.8" r=".9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-arrow-up-right" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></symbol>
+    <symbol id="i-arrow-down-right" viewBox="0 0 24 24"><path d="M6 6 18 18M18 8v10H8"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M4 12h16m0 0-6-6m6 6-6 6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H18v3"/><rect x="4" y="7.5" width="16" height="11" rx="2.5"/><path d="M16 13h1.5"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/></symbol>
+    <symbol id="i-trend" viewBox="0 0 24 24"><path d="M4 17 9 12l4 3 7-8"/><path d="M15 7h5v5"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5.5c0 4.7-3.2 7.8-8 9.5-4.8-1.7-8-4.8-8-9.5V6l8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-file-xls" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5"/><path d="m9 12 4 5m0-5-4 5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6V3Z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4.5 7 7.5 6 7.5-6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13"/><path d="M10 11v5M14 11v5"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="m14.5 5.5 4 4M4 20l1-5 11-11 4 4L9 19l-5 1Z"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 0 1-14.6 5.9L3.5 15.5"/><path d="M3.5 12a8.5 8.5 0 0 1 14.6-5.9l2.4 2.4"/><path d="M20.5 4v4.5H16M3.5 20v-4.5H8"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5.5" rx="8" ry="3"/><path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/><path d="M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5 12 4h8v8l-8.5 8.5-8-8Z"/><circle cx="16" cy="8" r="1.2"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M4 21V5l7-2v18M11 21h9V9h-9"/><path d="M7 7h1M7 11h1M7 15h1M15 12h1M15 16h1"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"/><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 2 7l-2-2"/><path d="M4 4v6h6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-pie" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z"/><path d="M15 3.8A9 9 0 0 1 20.2 9H15V3.8Z"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 0 1 5 .9c0 1.7-2.6 2-2.6 3.6"/><circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></symbol>
+    <symbol id="i-package" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></symbol>
+    <symbol id="i-hard-drive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01M17 7.5h1M17 16.5h1"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7 4 12l5 5"/><path d="M4 12h9a6 6 0 0 1 6 6v1"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></symbol>
+  </svg>
+
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-mark">衡</div>
+    <div class="boot-name">衡策</div>
+    <div class="boot-line"><span></span></div>
+    <p>正在打开经营数据工作台</p>
+  </div>
+
+  <div class="app-shell" id="appShell" aria-hidden="true">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#/dashboard" aria-label="衡策经营数据工作台首页">
+        <span class="brand-mark">衡</span>
+        <span class="brand-copy">
+          <strong>衡策</strong>
+          <small>经营数据工作台</small>
+        </span>
+      </a>
+
+      <nav class="side-nav" aria-label="主导航">
+        <p class="nav-caption">工作区</p>
+        <a href="#/dashboard" data-nav="dashboard" title="经营总览">
+          <svg class="icon"><use href="#i-grid"></use></svg><span>经营总览</span>
+        </a>
+        <a href="#/records" data-nav="records" title="数据明细">
+          <svg class="icon"><use href="#i-list"></use></svg><span>数据明细</span>
+          <em class="nav-count" id="navRecordCount">0</em>
+        </a>
+        <a href="#/import" data-nav="import" title="批量导入">
+          <svg class="icon"><use href="#i-upload"></use></svg><span>批量导入</span>
+        </a>
+        <a href="#/history" data-nav="history" title="导入记录">
+          <svg class="icon"><use href="#i-history"></use></svg><span>导入记录</span>
+        </a>
+        <p class="nav-caption nav-caption-second">管理</p>
+        <a href="#/settings" data-nav="settings" title="设置与数据安全">
+          <svg class="icon"><use href="#i-settings"></use></svg><span>设置与数据安全</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="local-card">
+          <div class="local-status">
+            <span class="status-dot"></span>
+            <span>本地离线运行</span>
+          </div>
+          <p>数据只保存在这台电脑</p>
+          <button type="button" class="text-link" id="helpButton">
+            <svg class="icon"><use href="#i-help"></use></svg> 使用帮助
+          </button>
+        </div>
+        <div class="sidebar-version">
+          <span id="sidebarVersion">衡策 v1.0.0</span>
+          <a href="#/settings" aria-label="查看版本与升级">升级</a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <button type="button" class="icon-button mobile-menu" id="mobileMenu" aria-label="打开导航">
+          <svg class="icon"><use href="#i-menu"></use></svg>
+        </button>
+        <div class="page-ident">
+          <p class="page-eyebrow" id="pageEyebrow">工作台</p>
+          <h1 id="pageTitle">经营总览</h1>
+        </div>
+        <div class="top-actions">
+          <form class="global-search" id="globalSearchForm" role="search">
+            <svg class="icon"><use href="#i-search"></use></svg>
+            <input id="globalSearchInput" type="search" placeholder="搜索单号、类别、往来单位" autocomplete="off" aria-label="全局搜索经营流水">
+            <kbd>Enter</kbd>
+          </form>
+          <a class="btn btn-primary top-import" id="topImportButton" href="#/import">
+            <svg class="icon"><use href="#i-plus"></use></svg><span>导入数据</span>
+          </a>
+        </div>
+      </header>
+
+      <main class="page" id="app" tabindex="-1"></main>
+      <footer class="app-footer">
+        <span>衡策 · 经营数据工作台</span>
+        <span class="footer-sep"></span>
+        <span>所有数据仅保存在本机</span>
+        <a href="#/settings">数据与版本</a>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast-root" id="toastRoot" aria-live="polite" aria-atomic="false"></div>
+  <div class="modal-root" id="modalRoot"></div>
+
+  <noscript>
+    <div class="noscript-card">此工作台需要启用 JavaScript 才能运行。请在浏览器设置中允许 JavaScript 后刷新。</div>
+  </noscript>
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
