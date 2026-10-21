@@ -2,6 +2,8 @@
 
 > 为办公室文员和财务文员准备的本地经营数据工作台：批量导入 Excel / Outlook 邮件，自动完成字段映射、校验、去重与汇总，并用清晰的仪表盘展示经营趋势。**全程离线，数据不出本机。**
 
+> **直接下载：** [Windows 11 x64 离线安装包](downloads/HengCeWorkbench-Windows-x64-v1.0.0.zip)（约 12 MB，内置 Python，无需联网安装）。解压后双击 `Start-HengCe.vbs`；需要桌面快捷方式时运行 `Install-HengCe.cmd`。
+
 ![经营总览](docs/dashboard.png)
 
 ## 1. 已实现能力
@@ -59,7 +61,7 @@
 
 ## 2. Windows 11 直接使用
 
-> 最新 Windows 离线包与校验文件请在本仓库的 [Releases](https://github.com/lirunwen/hengce-workbench/releases/latest) 页面下载。
+> 安装包已直接放在仓库 `downloads/` 目录；历史版本与完整发布记录见 [Releases](https://github.com/lirunwen/hengce-workbench/releases/latest)。校验值见 [downloads/SHA256SUMS.txt](downloads/SHA256SUMS.txt)。
 
 ### 方式 A：便携运行
 1. 解压 `HengCeWorkbench-Windows-x64-v1.0.0.zip`（不要只复制压缩包中的部分文件）。
