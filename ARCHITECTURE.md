@@ -1,4 +1,4 @@
-# 衡策经营数据工作台 · 架构设计
+# 数据统计工作台 · 架构设计
 
 版本：1.0.0  
 目标环境：Windows 11 x64 单机 / 办公室内网 / 完全离线 / 非技术背景文员  
@@ -54,7 +54,7 @@
 
 **运行链路：**
 
-1. 用户双击 `Start-HengCe.vbs`；
+1. 用户双击 `Start-DataStats.vbs`；
 2. 稳定启动器读取 `program/active.txt`，设置环境变量，把版本目录加入 `sys.path`；
 3. 启动 `app.py`，初始化 SQLite、日志、备份、导入暂存清理；
 4. waitress 只绑定 `127.0.0.1`，默认端口 8765，被占用则自动顺延；
@@ -134,7 +134,7 @@ tests/
 
 ### 5.1 SQLite 数据库
 
-数据库文件：`data/hengce.db`。连接参数：
+数据库文件：`data/workbench.db`。连接参数：
 
 - `PRAGMA journal_mode = WAL`：读写并发更稳，写入不阻塞仪表盘读取；
 - `PRAGMA synchronous = NORMAL`；
@@ -186,15 +186,15 @@ tests/
 
 ```text
 data/
-├─ hengce.db
-├─ hengce.db-wal / -shm
+├─ workbench.db
+├─ workbench.db-wal / -shm
 ├─ staging/<session>/
 │  ├─ session.json.gz      本次上传解析后的表格数据与会话状态
 │  └─ raw/                 原始上传文件与邮件附件
 ├─ reports/<batch>/<source>.csv   异常/重复/提示明细（UTF-8 BOM）
 ├─ backup/                 每日自动备份、手动、升级前、回退前备份
 ├─ updates/                升级包副本与暂存目录
-└─ logs/hengce.log         运行日志（轮转）
+└─ logs/workbench.log         运行日志（轮转）
 ```
 
 - 暂存会话 24 小时后清理。
@@ -208,10 +208,10 @@ data/
 | 场景 | 程序 | 数据 |
 | --- | --- | --- |
 | 便携运行 | 解压目录 | `<解压目录>\data` |
-| 安装运行 | `%LOCALAPPDATA%\HengCeWorkbench\program` | `%LOCALAPPDATA%\HengCeWorkbench\data` |
+| 安装运行 | `%LOCALAPPDATA%\DataStatsWorkbench\program` | `%LOCALAPPDATA%\DataStatsWorkbench\data` |
 
 升级只覆盖 `program/versions`，不会触碰 `data`。
-启动器通过 `HENGCE_DATA_DIR`、`HENGCE_INSTALL_ROOT`、`HENGCE_VERSION_DIR` 传递路径。
+启动器通过 `DATASTATS_DATA_DIR`、`DATASTATS_INSTALL_ROOT`、`DATASTATS_VERSION_DIR` 传递路径。
 
 ---
 
@@ -522,7 +522,7 @@ payload/
 ### 13.4 回退
 
 - 应用仍可启动时：设置 → 版本与离线升级 → 切换旧版本；
-- 新版本无法启动时：根目录 `Recovery-HengCe.cmd`；
+- 新版本无法启动时：根目录 `Recovery-DataStats.cmd`；
 - 回退会先备份数据库；
 - 如果数据库 schema 已经升级到旧版本不支持的版本，应使用升级前备份恢复。
 
@@ -546,15 +546,15 @@ payload/
 
 ### 14.1 推荐方式
 
-- 生成 `HengCeWorkbench-Windows-x64-v<version>.zip`；
+- 生成 `DataStatsWorkbench-Windows-x64-v<version>.zip`；
 - 复制到目标 Windows 11 电脑；
-- 解压到可写目录，双击 `Start-HengCe.vbs`；
-- 如需桌面图标，运行 `Install-HengCe.cmd`（无需管理员）。
+- 解压到可写目录，双击 `Start-DataStats.vbs`；
+- 如需桌面图标，运行 `Install-DataStats.cmd`（无需管理员）。
 
 安装脚本会：
 
 1. 检查工作台是否在运行；
-2. 复制程序到 `%LOCALAPPDATA%\HengCeWorkbench`，排除 `data`；
+2. 复制程序到 `%LOCALAPPDATA%\DataStatsWorkbench`，排除 `data`；
 3. 创建桌面和开始菜单快捷方式；
 4. 启动工作台。
 
@@ -601,7 +601,7 @@ python tests/updater_selftest.py  # 升级机制
 3. 校验异常明细、重复策略、导入后看板；
 4. 做一次手动备份；
 5. 制作一个测试升级包 1.0.1，完成安装、重启、回退；
-6. 用 `Recovery-HengCe.cmd` 做一次紧急回退演练。
+6. 用 `Recovery-DataStats.cmd` 做一次紧急回退演练。
 
 ---
 

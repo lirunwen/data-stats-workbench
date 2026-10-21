@@ -1,4 +1,4 @@
-' HengCe Workbench - silent launcher. Keep this file ASCII-only.
+' DataStats Workbench - silent launcher. Keep this file ASCII-only.
 Option Explicit
 Dim fso, shell, root, pythonw, launcher, command
 Set fso = CreateObject("Scripting.FileSystemObject")
@@ -7,11 +7,11 @@ root = fso.GetParentFolderName(WScript.ScriptFullName)
 pythonw = root & "\runtime\python\pythonw.exe"
 launcher = root & "\launcher.py"
 If Not fso.FileExists(pythonw) Then
-  MsgBox "The application runtime is missing." & vbCrLf & "Please extract the complete package again.", vbCritical, "HengCe Workbench"
+  MsgBox "The application runtime is missing." & vbCrLf & "Please extract the complete package again.", vbCritical, "DataStats Workbench"
   WScript.Quit 1
 End If
 If Not fso.FileExists(launcher) Then
-  MsgBox "The launcher is missing. Please extract the complete package again.", vbCritical, "HengCe Workbench"
+  MsgBox "The launcher is missing. Please extract the complete package again.", vbCritical, "DataStats Workbench"
   WScript.Quit 1
 End If
 shell.CurrentDirectory = root

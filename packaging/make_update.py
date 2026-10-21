@@ -21,7 +21,7 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PRODUCT = "hengce-workbench"
+PRODUCT = "data-stats-workbench"
 INCLUDE_FILES = ["app.py", "version.json", "requirements.txt"]
 INCLUDE_DIRS = ["backend", "web"]
 INCLUDE_VENDOR = "vendor"
@@ -88,7 +88,7 @@ def main() -> int:
         })
     out = Path(args.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
-    target = out / f"HengCe-Update-v{version}{args.extension}"
+    target = out / f"DataStats-Update-v{version}{args.extension}"
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=7) as archive:
         archive.writestr("update.json", json.dumps(manifest, ensure_ascii=False, indent=2))
         for path in files:

@@ -59,7 +59,7 @@ function versionCard(app) {
   const versions = update.versions || [];
   return `
     <div class="version-hero">
-      <span>HENGCE WORKBENCH</span>
+      <span>DATA WORKBENCH</span>
       <h3>v${e(running)}</h3>
       <p>${e(app.released || '')} · ${update.installed ? '安装版 · 离线运行' : '源码开发模式'}</p>
       <span class="version-badge"><span class="status-dot"></span>${update.restart_required ? `新版本 v${e(active)} 待重启生效` : '当前为最新启动版本'}</span>
@@ -489,9 +489,9 @@ export function render(container, ctx) {
       await api.quitApp();
       document.body.innerHTML = `
         <div class="exit-screen">
-          <div class="boot-mark">衡</div>
+          <div class="boot-mark">数</div>
           <h1>工作台已退出</h1>
-          <p>数据已保存在本机。需要继续使用时，请双击桌面上的「衡策经营数据工作台」快捷方式。</p>
+          <p>数据已保存在本机。需要继续使用时，请双击桌面上的「数据统计工作台」快捷方式。</p>
           <span>现在可以关闭此页面。</span>
         </div>`;
     } catch (error) {

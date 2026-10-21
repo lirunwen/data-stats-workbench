@@ -16,7 +16,7 @@ import urllib.request
 from datetime import datetime
 from pathlib import Path
 
-PRODUCT = "hengce-workbench"
+PRODUCT = "data-stats-workbench"
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 
@@ -41,7 +41,7 @@ def backup_database(db_path: Path, backup_dir: Path) -> Path | None:
     if not db_path.exists():
         return None
     backup_dir.mkdir(parents=True, exist_ok=True)
-    target = backup_dir / f"hengce-recovery-{datetime.now().strftime('%Y%m%d-%H%M%S')}.db"
+    target = backup_dir / f"workbench-recovery-{datetime.now().strftime('%Y%m%d-%H%M%S')}.db"
     source = sqlite3.connect(str(db_path))
     try:
         destination = sqlite3.connect(str(target))
@@ -58,7 +58,7 @@ def main() -> int:
     root = Path(__file__).resolve().parent
     program = root / "program"
     versions_dir = program / "versions"
-    data_dir = Path(os.environ.get("HENGCE_DATA_DIR") or (root / "data")).resolve()
+    data_dir = Path(os.environ.get("DATASTATS_DATA_DIR") or (root / "data")).resolve()
     if app_is_running(data_dir):
         print("工作台正在运行。请先关闭浏览器页面，并在「设置与数据安全 → 退出工作台」中停止服务。")
         return 1
@@ -77,7 +77,7 @@ def main() -> int:
         pass
     candidates = [path for path in versions if path.name != active] or versions
     default = candidates[0].name
-    print("衡策经营数据工作台 · 启动版本恢复")
+    print("数据统计工作台 · 启动版本恢复")
     print("=" * 48)
     print("可用版本：")
     for index, path in enumerate(versions, start=1):
@@ -112,7 +112,7 @@ def main() -> int:
     except Exception:
         print("目标版本信息无效，未做任何修改。")
         return 1
-    backup = backup_database(data_dir / "hengce.db", data_dir / "backup")
+    backup = backup_database(data_dir / "workbench.db", data_dir / "backup")
     temp = program / "active.txt.tmp"
     temp.write_text(selected.name + "\n", encoding="utf-8")
     os.replace(temp, program / "active.txt")
@@ -121,15 +121,15 @@ def main() -> int:
     if backup:
         print(f"数据库备份：{backup}")
     print("正在重新打开工作台…")
-    launcher = root / "Start-HengCe.vbs"
+    launcher = root / "Start-DataStats.vbs"
     try:
         if os.name == "nt" and launcher.exists():
             os.startfile(str(launcher))  # type: ignore[attr-defined]
         else:
-            print("请双击 Start-HengCe.vbs 启动。")
+            print("请双击 Start-DataStats.vbs 启动。")
     except Exception as exc:
         print(f"自动启动失败：{exc}")
-        print("请手动双击 Start-HengCe.vbs。")
+        print("请手动双击 Start-DataStats.vbs。")
     return 0
 
 

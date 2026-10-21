@@ -18,10 +18,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / "samples"
-TEMP = Path(tempfile.mkdtemp(prefix="hengce-smoke-"))
-os.environ["HENGCE_DATA_DIR"] = str(TEMP / "data")
-os.environ.pop("HENGCE_INSTALL_ROOT", None)
-os.environ.pop("HENGCE_VERSION_DIR", None)
+TEMP = Path(tempfile.mkdtemp(prefix="workbench-smoke-"))
+os.environ["DATASTATS_DATA_DIR"] = str(TEMP / "data")
+os.environ.pop("DATASTATS_INSTALL_ROOT", None)
+os.environ.pop("DATASTATS_VERSION_DIR", None)
 sys.path.insert(0, str(ROOT))
 
 from backend import config, db  # noqa: E402

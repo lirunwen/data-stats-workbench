@@ -26,8 +26,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 WINDOWS_ASSETS = ROOT / "packaging" / "windows"
-PRODUCT = "hengce-workbench"
-PACKAGE_FOLDER = "HengCeWorkbench"
+PRODUCT = "data-stats-workbench"
+PACKAGE_FOLDER = "DataStatsWorkbench"
 VERSION_FILES = [
     "app.py", "version.json", "requirements.txt",
 ]
@@ -164,8 +164,8 @@ def install_runtime(runtime_python: Path, embed_zip: Path, wheels: Path) -> None
 
 def copy_windows_assets(build_root: Path) -> None:
     for name in (
-        "HengCe.ico", "Start-HengCe.vbs", "Start-HengCe-Console.cmd",
-        "Install-HengCe.cmd", "Diagnostics.cmd", "Recovery-HengCe.cmd", "install.ps1", "README.txt",
+        "DataStats.ico", "Start-DataStats.vbs", "Start-DataStats-Console.cmd",
+        "Install-DataStats.cmd", "Diagnostics.cmd", "Recovery-DataStats.cmd", "install.ps1", "README.txt",
         "THIRD_PARTY_NOTICES.txt",
     ):
         shutil.copy2(WINDOWS_ASSETS / name, build_root / name)
@@ -225,7 +225,7 @@ def main() -> int:
         }, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    zip_path = out / f"HengCeWorkbench-Windows-x64-v{version}.zip"
+    zip_path = out / f"DataStatsWorkbench-Windows-x64-v{version}.zip"
     if not args.no_zip:
         make_zip(build_parent, PACKAGE_FOLDER, zip_path)
     print(f"portable folder: {build_root}")

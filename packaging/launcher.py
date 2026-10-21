@@ -19,7 +19,7 @@ def fatal(message: str) -> None:
         if os.name == "nt":
             import ctypes
 
-            ctypes.windll.user32.MessageBoxW(0, message, "衡策经营数据工作台", 0x10)
+            ctypes.windll.user32.MessageBoxW(0, message, "数据统计工作台", 0x10)
         else:
             print(message, file=sys.stderr)
     finally:
@@ -54,7 +54,7 @@ def main() -> None:
             "请检查 program/active.txt，或重新安装完整包。\n"
             f"程序目录：{version_dir}"
         )
-    data_dir = Path(os.environ.get("HENGCE_DATA_DIR") or (root / "data")).resolve()
+    data_dir = Path(os.environ.get("DATASTATS_DATA_DIR") or (root / "data")).resolve()
     try:
         data_dir.mkdir(parents=True, exist_ok=True)
         # 检查数据目录可写，避免启动后才在保存时失败。
@@ -67,10 +67,10 @@ def main() -> None:
             f"目录：{data_dir}\n原因：{exc}\n\n"
             "请将程序放到有写入权限的位置，或联系管理员。"
         )
-    os.environ["HENGCE_PACKAGED"] = "1"
-    os.environ["HENGCE_INSTALL_ROOT"] = str(root)
-    os.environ["HENGCE_VERSION_DIR"] = str(version_dir)
-    os.environ["HENGCE_DATA_DIR"] = str(data_dir)
+    os.environ["DATASTATS_PACKAGED"] = "1"
+    os.environ["DATASTATS_INSTALL_ROOT"] = str(root)
+    os.environ["DATASTATS_VERSION_DIR"] = str(version_dir)
+    os.environ["DATASTATS_DATA_DIR"] = str(data_dir)
     if os.name == "nt":
         os.chdir(version_dir)
     for path in (version_dir / "vendor", version_dir, version_dir / "web"):

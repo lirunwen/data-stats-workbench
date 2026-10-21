@@ -357,7 +357,7 @@ export function openHelpModal() {
     size: 'lg',
     body: `
       <div class="help-hero">
-        <span class="brand-mark">衡</span>
+        <span class="brand-mark">数</span>
         <div>
           <h3>先看数据，再做决定</h3>
           <p>工作台会自动完成字段识别、校验、去重与汇总。原始文件不会离开这台电脑。</p>

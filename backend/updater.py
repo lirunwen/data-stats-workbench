@@ -98,7 +98,7 @@ def _load_manifest(zip_file: zipfile.ZipFile) -> dict:
     except Exception as exc:
         raise AppError("升级包清单无法解析", 400, "invalid_package") from exc
     if manifest.get("product") != config.APP_PRODUCT:
-        raise AppError("这个升级包不属于衡策经营数据工作台", 400, "wrong_product")
+        raise AppError("这个升级包不属于数据统计工作台", 400, "wrong_product")
     if manifest.get("format") != 1:
         raise AppError("升级包格式版本不受支持，请使用新版完整安装包", 400, "unsupported_format")
     try:
@@ -444,8 +444,8 @@ def schedule_restart() -> dict:
         raise AppError("没有等待生效的新版本", 409, "no_pending_version")
     launcher = None
     for candidate in (
-        config.INSTALL_ROOT / "Start-HengCe.vbs",
-        config.INSTALL_ROOT / "Start-HengCe-Console.cmd",
+        config.INSTALL_ROOT / "Start-DataStats.vbs",
+        config.INSTALL_ROOT / "Start-DataStats-Console.cmd",
         config.INSTALL_ROOT / "启动经营数据工作台.vbs",
     ):
         if candidate.exists():

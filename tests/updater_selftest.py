@@ -12,7 +12,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TEMP = Path(tempfile.mkdtemp(prefix="hengce-update-test-"))
+TEMP = Path(tempfile.mkdtemp(prefix="workbench-update-test-"))
 INSTALL = TEMP / "install"
 SOURCE = TEMP / "source-1.0.1"
 DATA = INSTALL / "data"
@@ -30,10 +30,10 @@ def prepare():
     (INSTALL / "program" / "active.txt").parent.mkdir(parents=True, exist_ok=True)
     (INSTALL / "program" / "active.txt").write_text(version + "\n", encoding="utf-8")
     (INSTALL / "program" / "versions" / version / "version.json").write_text(
-        json.dumps({"product": "hengce-workbench", "version": version, "released": "2026-10-21"}, ensure_ascii=False),
+        json.dumps({"product": "data-stats-workbench", "version": version, "released": "2026-10-21"}, ensure_ascii=False),
         encoding="utf-8",
     )
-    (INSTALL / "Start-HengCe.vbs").write_text("' placeholder\n", encoding="ascii")
+    (INSTALL / "Start-DataStats.vbs").write_text("' placeholder\n", encoding="ascii")
     shutil.copytree(
         ROOT, SOURCE,
         ignore=shutil.ignore_patterns("data", "dist", ".git", "__pycache__", "*.pyc", ".venv"),
@@ -50,15 +50,15 @@ def prepare():
     )
     if result.returncode != 0:
         raise RuntimeError(result.stderr or result.stdout)
-    return package_dir / "HengCe-Update-v1.0.1.zip"
+    return package_dir / "DataStats-Update-v1.0.1.zip"
 
 
 def main():
     package_path = prepare()
-    os.environ["HENGCE_DATA_DIR"] = str(DATA)
-    os.environ["HENGCE_INSTALL_ROOT"] = str(INSTALL)
-    os.environ["HENGCE_VERSION_DIR"] = str(INSTALL / "program" / "versions" / "1.0.0")
-    os.environ["HENGCE_PACKAGED"] = "1"
+    os.environ["DATASTATS_DATA_DIR"] = str(DATA)
+    os.environ["DATASTATS_INSTALL_ROOT"] = str(INSTALL)
+    os.environ["DATASTATS_VERSION_DIR"] = str(INSTALL / "program" / "versions" / "1.0.0")
+    os.environ["DATASTATS_PACKAGED"] = "1"
     sys.path.insert(0, str(ROOT))
     from backend import config, db, updater
     from backend.errors import AppError
@@ -93,7 +93,7 @@ def main():
     check(active == "1.0.1", "切换 active.txt")
     check((INSTALL / "program" / "versions" / "1.0.1" / "app.py").exists(), "新版本目录落盘")
     check((INSTALL / "program" / "versions" / "1.0.0" / "version.json").exists(), "旧版本保留")
-    check(bool(list((DATA / "backup").glob("hengce-pre-update-*.db"))), "升级前备份数据库")
+    check(bool(list((DATA / "backup").glob("workbench-pre-update-*.db"))), "升级前备份数据库")
     status = updater.status()
     check(status["restart_required"] is True and status["active_version"] == "1.0.1", "提示重启")
     check(status["running_version"] == "1.0.0", "运行版本仍是旧版")

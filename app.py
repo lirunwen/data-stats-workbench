@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""衡策经营数据工作台 · 本地启动器。
+"""数据统计工作台 · 本地启动器。
 
 默认只监听 127.0.0.1，不依赖公网和任何外部资源。
 双击启动脚本或运行 `python app.py` 后，会自动在默认浏览器打开工作台。
@@ -28,7 +28,7 @@ from backend.api import api
 from backend.errors import AppError
 from backend.utils import now_iso
 
-log = logging.getLogger("hengce")
+log = logging.getLogger("datastats")
 
 PRODUCT = config.APP_PRODUCT
 
@@ -41,7 +41,7 @@ def setup_logging() -> None:
         logger.removeHandler(handler)
     formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s · %(message)s")
     file_handler = RotatingFileHandler(
-        config.LOG_DIR / "hengce.log", maxBytes=2 * 1024 * 1024, backupCount=4, encoding="utf-8"
+        config.LOG_DIR / "workbench.log", maxBytes=2 * 1024 * 1024, backupCount=4, encoding="utf-8"
     )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -56,7 +56,7 @@ def _fatal_message(message: str) -> None:
         try:
             import ctypes
 
-            ctypes.windll.user32.MessageBoxW(0, message, "衡策经营数据工作台", 0x10)
+            ctypes.windll.user32.MessageBoxW(0, message, "数据统计工作台", 0x10)
         except Exception:
             pass
 
@@ -141,7 +141,7 @@ def create_app() -> Flask:
         if request.path.startswith("/api/"):
             return jsonify({
                 "ok": False,
-                "error": "处理时发生意外错误，数据未被修改。请重试，或查看 data/logs/hengce.log。",
+                "error": "处理时发生意外错误，数据未被修改。请重试，或查看 data/logs/workbench.log。",
                 "code": "internal_error",
             }), 500
         return "应用发生错误，请查看日志或联系管理员。", 500
@@ -232,9 +232,9 @@ def _open_browser_later(url: str, port: int) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="衡策经营数据工作台")
+    parser = argparse.ArgumentParser(description="数据统计工作台")
     parser.add_argument("--data-dir", help="指定数据目录（默认程序目录下的 data）")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("HENGCE_PORT", "8765")))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("DATASTATS_PORT", "8765")))
     parser.add_argument("--no-browser", action="store_true", help="不自动打开浏览器")
     parser.add_argument("--version", action="store_true", help="显示版本并退出")
     args = parser.parse_args()
@@ -278,7 +278,7 @@ def main() -> int:
         _write_runtime(port)
         if not args.no_browser:
             threading.Thread(target=_open_browser_later, args=(url, port), daemon=True).start()
-        print(f"\n  衡策经营数据工作台已启动\n  访问地址：{url}\n  仅本机可访问，按 Ctrl+C 停止\n")
+        print(f"\n  数据统计工作台已启动\n  访问地址：{url}\n  仅本机可访问，按 Ctrl+C 停止\n")
         try:
             from waitress import serve
         except ImportError as exc:
@@ -291,7 +291,7 @@ def main() -> int:
             channel_timeout=180,
             max_request_body_size=config.MAX_UPLOAD_BYTES + 5 * 1024 * 1024,
             clear_untrusted_proxy_headers=True,
-            ident="HengceWorkbench",
+            ident="DataStatsWorkbench",
         )
         _remove_runtime()
         return 0
@@ -303,7 +303,7 @@ def main() -> int:
         log.exception("启动失败")
         _fatal_message(
             f"应用启动失败：{exc}\n\n"
-            f"日志位置：{config.LOG_DIR / 'hengce.log'}\n"
+            f"日志位置：{config.LOG_DIR / 'workbench.log'}\n"
             "请确认数据目录可写，然后重新打开应用。"
         )
         return 1

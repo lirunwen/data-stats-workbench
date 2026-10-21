@@ -56,7 +56,7 @@ def make_workbook():
         ws.column_dimensions[col].width = width
     ws.freeze_panes = "A2"
     ws2 = wb.create_sheet("说明")
-    ws2["A1"] = "这是衡策工作台生成的验收示例文件。"
+    ws2["A1"] = "这是数据统计工作台生成的验收示例文件。"
     ws2["A2"] = "包含正常数据、重复、空日期、非法金额、未知收支等情形。"
     wb.save(SAMPLES / "经营流水_示例_含异常.xlsx")
 

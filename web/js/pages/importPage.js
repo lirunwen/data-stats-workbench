@@ -691,8 +691,78 @@ function successStep() {
     </div>`;
 }
 
+/**
+ * 记录重建前的交互状态。
+ *
+ * renderWizard 用 innerHTML 整体替换，浏览器会把焦点丢回 body、把滚动位置重置、
+ * 让展开的 <details> 收起。结果是「改完一个字段映射，下拉框立刻失焦关闭」，
+ * 无法用 Tab 连续标注。这里在重建前把状态记下来，重建后原样恢复。
+ */
+function captureWizardState() {
+  const state = { scrollY: window.scrollY, selector: '', start: null, end: null, details: [] };
+  if (currentContainer) {
+    state.details = Array.from(currentContainer.querySelectorAll('details')).map((item) => item.open);
+  }
+  const active = document.activeElement;
+  if (!active || active === document.body || !currentContainer?.contains(active)) {
+    return state;
+  }
+  const tag = active.tagName.toLowerCase();
+  if (active.id) {
+    state.selector = `${tag}#${CSS.escape(active.id)}`;
+  } else {
+    // 用控件自身的 data-* 属性做定位（data-map-field / data-header-row / data-source-check …），
+    // 不需要给每个控件另加 id。
+    const parts = [];
+    for (const attr of Array.from(active.attributes || [])) {
+      if (!attr.name.startsWith('data-')) continue;
+      parts.push(`[${attr.name}="${CSS.escape(attr.value)}"]`);
+    }
+    if (parts.length) state.selector = `${tag}${parts.join('')}`;
+  }
+  if (typeof active.selectionStart === 'number') {
+    state.start = active.selectionStart;
+    state.end = typeof active.selectionEnd === 'number' ? active.selectionEnd : active.selectionStart;
+  }
+  return state;
+}
+
+function restoreWizardState(state) {
+  if (!state || !currentContainer) return;
+  currentContainer.querySelectorAll('details').forEach((item, index) => {
+    if (state.details[index]) item.open = true;
+  });
+  if (state.selector) {
+    let target = null;
+    try {
+      target = currentContainer.querySelector(state.selector);
+    } catch {
+      target = null;
+    }
+    if (target) {
+      try {
+        target.focus({ preventScroll: true });
+      } catch {
+        target.focus?.();
+      }
+      if (state.start !== null && typeof target.setSelectionRange === 'function') {
+        try {
+          target.setSelectionRange(state.start, state.end);
+        } catch {
+          // <select> 等控件不支持选区，忽略即可。
+        }
+      }
+    }
+  }
+  // 放在 focus 之后：否则 focus() 可能把元素滚进视口，覆盖掉原来的滚动位置。
+  // 用 instant 而不是 auto：样式里有 html { scroll-behavior: smooth }，
+  // auto 会沿用 CSS 值而变成动画，看起来像页面自己往下滑。
+  window.scrollTo({ top: state.scrollY, behavior: 'instant' });
+}
+
 function renderWizard({ scroll = false } = {}) {
   if (!currentContainer) return;
+  const previous = captureWizardState();
   let content = startStep();
   if (wizard.step === 'mapping') content = mappingStep();
   else if (wizard.step === 'validating') content = validatingStep();
@@ -700,6 +770,7 @@ function renderWizard({ scroll = false } = {}) {
   else if (wizard.step === 'success') content = successStep();
   currentContainer.innerHTML = content;
   if (scroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  else restoreWizardState(previous);
 }
 
 function validatingStep() {

@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = 'Stop'
 $Source = $PSScriptRoot
-$Target = Join-Path $env:LOCALAPPDATA 'HengCeWorkbench'
+$Target = Join-Path $env:LOCALAPPDATA 'DataStatsWorkbench'
 $TargetFull = [System.IO.Path]::GetFullPath($Target)
 $SourceFull = [System.IO.Path]::GetFullPath($Source)
 $same = $SourceFull.TrimEnd('\') -ieq $TargetFull.TrimEnd('\')
@@ -21,7 +21,7 @@ if ($running.Count -gt 0) {
 }
 
 if (-not $same) {
-    Write-Host '正在安装衡策经营数据工作台…' -ForegroundColor Cyan
+    Write-Host '正在安装数据统计工作台…' -ForegroundColor Cyan
     New-Item -ItemType Directory -Path $TargetFull -Force | Out-Null
     $exclude = Join-Path $SourceFull 'data'
     & robocopy $SourceFull $TargetFull /E /XD $exclude /NFL /NDL /NJH /NJS /NP | Out-Null
@@ -34,8 +34,8 @@ if (-not $same) {
 
 $dataDir = Join-Path $TargetFull 'data'
 New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
-$launcher = Join-Path $TargetFull 'Start-HengCe.vbs'
-$icon = Join-Path $TargetFull 'HengCe.ico'
+$launcher = Join-Path $TargetFull 'Start-DataStats.vbs'
+$icon = Join-Path $TargetFull 'DataStats.ico'
 $wscript = Join-Path $env:WINDIR 'System32\wscript.exe'
 $shortcutArgs = '"' + $launcher + '"'
 
@@ -46,16 +46,16 @@ function New-AppShortcut($Path) {
     $shortcut.Arguments = $shortcutArgs
     $shortcut.WorkingDirectory = $TargetFull
     if (Test-Path $icon) { $shortcut.IconLocation = $icon }
-    $shortcut.Description = '衡策经营数据工作台 · 本地离线'
+    $shortcut.Description = '数据统计工作台 · 本地离线'
     $shortcut.Save()
 }
 
 $desktop = [Environment]::GetFolderPath('Desktop')
-New-AppShortcut (Join-Path $desktop '衡策经营数据工作台.lnk')
+New-AppShortcut (Join-Path $desktop '数据统计工作台.lnk')
 $programs = [Environment]::GetFolderPath('Programs')
-$menuFolder = Join-Path $programs '衡策经营数据工作台'
+$menuFolder = Join-Path $programs '数据统计工作台'
 New-Item -ItemType Directory -Path $menuFolder -Force | Out-Null
-New-AppShortcut (Join-Path $menuFolder '衡策经营数据工作台.lnk')
+New-AppShortcut (Join-Path $menuFolder '数据统计工作台.lnk')
 
 $readmeTarget = Join-Path $menuFolder '使用说明.txt'
 $readmeSource = Join-Path $TargetFull 'README.txt'

@@ -82,7 +82,7 @@ export const api = {
   ),
   settings: () => request('/api/settings'),
   saveSettings: (payload) => request('/api/settings', { method: 'PUT', body: payload }),
-  createBackup: () => download('/api/maintenance/backup', { method: 'POST', filename: '衡策数据备份.db' }),
+  createBackup: () => download('/api/maintenance/backup', { method: 'POST', filename: '数据统计工作台数据备份.db' }),
   cleanup: () => request('/api/maintenance/cleanup', { method: 'POST' }),
   audit: () => request('/api/audit?limit=12'),
   mappingProfiles: () => request('/api/mapping-profiles'),

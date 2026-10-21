@@ -436,32 +436,61 @@ def _safe_excel_text(value: Any) -> str:
 
 
 def export_xlsx(filters: dict) -> tuple[bytes, str]:
+    """导出为 Excel（流式写入）。
+
+    必须使用 write_only 模式：openpyxl 的常规模式会为每个单元格复制样式代理，
+    单行成本随行数上升（实测 200 行 0.35 ms/行，1 万行 2.1 ms/行，5 万行约 10 ms/行），
+    5 万行导出会退化到 8 分钟以上。write_only 直接流式写 XML，同样数据只需数秒。
+
+    代价是不再写入 Excel「表格对象」（Table）。已用「自动筛选 + 交替底色」替代，
+    用户的筛选、排序、打印体验不变。
+    """
     from openpyxl import Workbook
+    from openpyxl.cell import WriteOnlyCell
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
-    from openpyxl.worksheet.table import Table, TableStyleInfo
 
     records, summary = build_export_rows(filters)
-    workbook = Workbook()
-    sheet = workbook.active
-    sheet.title = "经营流水"
-    sheet.sheet_view.showGridLines = False
-    headers = ["序号", "业务日期", "收支类型", "经营类别", "部门", "往来单位", "金额（元）",
-               "结算方式", "单据编号", "摘要 / 备注", "来源", "来源位置", "录入时间"]
+
+    # 样式对象只构造一次，全表复用；原实现每格新建，5 万行要构造 65 万次。
     header_fill = PatternFill("solid", fgColor="173F35")
     header_font = Font(name="微软雅黑", size=10, bold=True, color="FFFFFF")
     body_font = Font(name="微软雅黑", size=10, color="2C3330")
-    thin = Side(style="thin", color="E4E8E2")
-    border = Border(bottom=thin)
-    sheet.append(headers)
-    for cell in sheet[1]:
+    band_fill = PatternFill("solid", fgColor="FAFBF8")
+    border = Border(bottom=Side(style="thin", color="E4E8E2"))
+    header_align = Alignment(horizontal="center", vertical="center")
+    body_align = Alignment(vertical="center")
+    body_align_wrap = Alignment(vertical="center", wrap_text=True)
+    wrap_columns = {10, 12}
+
+    headers = ["序号", "业务日期", "收支类型", "经营类别", "部门", "往来单位", "金额（元）",
+               "结算方式", "单据编号", "摘要 / 备注", "来源", "来源位置", "录入时间"]
+
+    workbook = Workbook(write_only=True)
+    sheet = workbook.create_sheet("经营流水")
+    sheet.sheet_view.showGridLines = False
+    # write_only 会在第一次 append 时写出工作表头部（cols / sheetView / autoFilter），
+    # 因此列宽、冻结窗格、筛选范围必须在 append 之前设置，否则会被静默丢弃。
+    widths = [6, 12, 9, 18, 12, 22, 14, 12, 16, 30, 10, 36, 20]
+    for index, width in enumerate(widths, start=1):
+        sheet.column_dimensions[get_column_letter(index)].width = width
+    if records:
+        sheet.freeze_panes = "A2"
+        sheet.auto_filter.ref = f"A1:M{len(records) + 1}"
+
+    header_cells = []
+    for value in headers:
+        cell = WriteOnlyCell(sheet, value=value)
         cell.fill = header_fill
         cell.font = header_font
-        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.alignment = header_align
         cell.border = border
+        header_cells.append(cell)
     sheet.row_dimensions[1].height = 28
+    sheet.append(header_cells)
+
     for idx, record in enumerate(records, start=1):
-        sheet.append([
+        values = [
             idx,
             record["business_date"],
             record["direction_label"],
@@ -475,34 +504,38 @@ def export_xlsx(filters: dict) -> tuple[bytes, str]:
             record["source_label"],
             _safe_excel_text(record["source_location"]),
             record["created_at"].replace("T", " ")[:19],
-        ])
-        row_index = sheet.max_row
-        for cell in sheet[row_index]:
+        ]
+        cells = []
+        for position, value in enumerate(values, start=1):
+            cell = WriteOnlyCell(sheet, value=value)
             cell.font = body_font
             cell.border = border
-            cell.alignment = Alignment(vertical="center", wrap_text=(cell.column in {10, 12}))
-        sheet.cell(row=row_index, column=7).number_format = "#,##0.00"
-        sheet.row_dimensions[row_index].height = 22
-    widths = [6, 12, 9, 18, 12, 22, 14, 12, 16, 30, 10, 36, 20]
-    for index, width in enumerate(widths, start=1):
-        sheet.column_dimensions[get_column_letter(index)].width = width
-    if records:
-        ref = f"A1:M{sheet.max_row}"
-        tab = Table(displayName="LedgerTable", ref=ref)
-        tab.tableStyleInfo = TableStyleInfo(
-            name="TableStyleMedium2", showRowStripes=True, showColumnStripes=False
-        )
-        sheet.add_table(tab)
-        sheet.freeze_panes = "A2"
-        sheet.auto_filter.ref = ref
+            cell.alignment = body_align_wrap if position in wrap_columns else body_align
+            if idx % 2 == 0:
+                cell.fill = band_fill
+            cells.append(cell)
+        cells[6].number_format = "#,##0.00"
+        # 行高同样要在 append 之前登记，否则不会被写入 XML。
+        sheet.row_dimensions[idx + 1].height = 22
+        sheet.append(cells)
 
+    # ---- 汇总页 ----
     summary_sheet = workbook.create_sheet("汇总")
     summary_sheet.sheet_view.showGridLines = False
     summary_sheet.column_dimensions["A"].width = 20
     summary_sheet.column_dimensions["B"].width = 22
-    summary_sheet["A1"] = "经营数据导出汇总"
-    summary_sheet["A1"].font = Font(name="微软雅黑", size=16, bold=True, color="173F35")
-    summary_sheet.merge_cells("A1:C1")
+    summary_sheet.column_dimensions["C"].width = 18
+    summary_sheet.column_dimensions["D"].width = 18
+    # write_only 工作表没有 merge_cells 方法，直接向 merged_cells 登记区域即可。
+    summary_sheet.merged_cells.add("A1:C1")
+
+    title = WriteOnlyCell(summary_sheet, value="经营数据导出汇总")
+    title.font = Font(name="微软雅黑", size=16, bold=True, color="173F35")
+    summary_sheet.append([title])
+    summary_sheet.append([None])  # 空行，使元信息从第 3 行开始
+
+    label_font = Font(name="微软雅黑", size=10, bold=True, color="66716B")
+    value_font = Font(name="微软雅黑", size=10, color="1D2622")
     meta_rows = [
         ("导出时间", date.today().isoformat()),
         ("筛选条件", export_filter_label(filters)),
@@ -511,37 +544,39 @@ def export_xlsx(filters: dict) -> tuple[bytes, str]:
         ("支出合计（元）", summary["expense_cents"] / 100),
         ("经营净额（元）", summary["net_cents"] / 100),
     ]
-    for row_index, (label, value) in enumerate(meta_rows, start=3):
-        summary_sheet.cell(row=row_index, column=1, value=label).font = Font(
-            name="微软雅黑", size=10, bold=True, color="66716B"
-        )
-        cell = summary_sheet.cell(row=row_index, column=2, value=value)
-        cell.font = Font(name="微软雅黑", size=10, color="1D2622")
+    for label, value in meta_rows:
+        label_cell = WriteOnlyCell(summary_sheet, value=label)
+        label_cell.font = label_font
+        value_cell = WriteOnlyCell(summary_sheet, value=value)
+        value_cell.font = value_font
         if "元" in label:
-            cell.number_format = "#,##0.00"
-    # 分类汇总
-    summary_sheet["A10"] = "经营类别"
-    summary_sheet["B10"] = "收入（元）"
-    summary_sheet["C10"] = "支出（元）"
-    summary_sheet["D10"] = "净额（元）"
-    for cell in summary_sheet[10]:
-        if cell.value:
-            cell.font = Font(name="微软雅黑", size=10, bold=True, color="FFFFFF")
-            cell.fill = PatternFill("solid", fgColor="2F6B5B")
-            cell.alignment = Alignment(horizontal="center")
-    summary_sheet.column_dimensions["C"].width = 18
-    summary_sheet.column_dimensions["D"].width = 18
+            value_cell.number_format = "#,##0.00"
+        summary_sheet.append([label_cell, value_cell])
+
+    summary_sheet.append([None])  # 空行，分类汇总表头固定在第 10 行
+    header_fill_summary = PatternFill("solid", fgColor="2F6B5B")
+    summary_align = Alignment(horizontal="center")
+    category_header = []
+    for value in ("经营类别", "收入（元）", "支出（元）", "净额（元）"):
+        cell = WriteOnlyCell(summary_sheet, value=value)
+        cell.font = Font(name="微软雅黑", size=10, bold=True, color="FFFFFF")
+        cell.fill = header_fill_summary
+        cell.alignment = summary_align
+        category_header.append(cell)
+    summary_sheet.append(category_header)
+
     categories: dict[str, list[int]] = {}
     for record in records:
         bucket = categories.setdefault(record["category"], [0, 0])
         bucket[0 if record["direction"] == "income" else 1] += record["amount_cents"]
-    for row_index, (name, amounts) in enumerate(
-        sorted(categories.items(), key=lambda item: sum(item[1]), reverse=True), start=11
-    ):
-        summary_sheet.cell(row=row_index, column=1, value=_safe_excel_text(name))
-        summary_sheet.cell(row=row_index, column=2, value=amounts[0] / 100).number_format = "#,##0.00"
-        summary_sheet.cell(row=row_index, column=3, value=amounts[1] / 100).number_format = "#,##0.00"
-        summary_sheet.cell(row=row_index, column=4, value=(amounts[0] - amounts[1]) / 100).number_format = "#,##0.00"
+    for name, amounts in sorted(categories.items(), key=lambda item: sum(item[1]), reverse=True):
+        name_cell = WriteOnlyCell(summary_sheet, value=_safe_excel_text(name))
+        income_cell = WriteOnlyCell(summary_sheet, value=amounts[0] / 100)
+        expense_cell = WriteOnlyCell(summary_sheet, value=amounts[1] / 100)
+        net_cell = WriteOnlyCell(summary_sheet, value=(amounts[0] - amounts[1]) / 100)
+        for cell in (income_cell, expense_cell, net_cell):
+            cell.number_format = "#,##0.00"
+        summary_sheet.append([name_cell, income_cell, expense_cell, net_cell])
 
     workbook.properties.creator = config.APP_NAME
     workbook.properties.title = "经营流水导出"

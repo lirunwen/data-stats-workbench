@@ -155,7 +155,7 @@ function onboarding() {
       </div>
       <section class="dashboard-empty">
         <div class="dashboard-empty-copy">
-          <p class="eyebrow">欢迎使用衡策工作台</p>
+          <p class="eyebrow">欢迎使用数据统计工作台</p>
           <h2>把每一笔经营，汇成一张清晰的图。</h2>
           <p>导入 Excel 台账或 Outlook 邮件中的表格，工作台会自动识别字段、校验数据、合并重复项，并把收入、支出与经营净额汇总成可读的图表。</p>
           <div class="empty-actions">

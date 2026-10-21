@@ -67,7 +67,7 @@ def build_import_template() -> tuple[bytes, str]:
     help_sheet.sheet_view.showGridLines = False
     help_sheet.column_dimensions["A"].width = 116
     lines = [
-        ("衡策 · 经营流水导入模板", 18, True, "174D3F"),
+        ("数据统计工作台 · 经营流水导入模板", 18, True, "174D3F"),
         ("", 10, False, "26352F"),
         ("填写方法", 12, True, "2F6B5B"),
         ("1. 在「经营流水」工作表中从第 2 行开始填写，每行一笔收入或支出。示例行可以直接删除。", 10, False, "4E5D55"),
@@ -99,4 +99,4 @@ def build_import_template() -> tuple[bytes, str]:
     workbook.properties.subject = "本地离线导入模板"
     output = io.BytesIO()
     workbook.save(output)
-    return output.getvalue(), "衡策_经营流水导入模板.xlsx"
+    return output.getvalue(), "数据统计工作台_经营流水导入模板.xlsx"

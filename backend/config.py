@@ -2,8 +2,8 @@
 
 程序目录与数据目录严格分离：
 - 程序目录：安装包解压后的 versions/<版本>，升级时整目录替换；
-- 数据目录：Windows 默认位于 %LOCALAPPDATA%\\HengCeWorkbench\\data，升级不受影响。
-开发模式默认使用项目下的 data/，测试可通过 HENGCE_DATA_DIR 隔离。
+- 数据目录：Windows 默认位于 %LOCALAPPDATA%\\DataStatsWorkbench\\data，升级不受影响。
+开发模式默认使用项目下的 data/，测试可通过 DATASTATS_DATA_DIR 隔离。
 """
 from __future__ import annotations
 
@@ -14,8 +14,8 @@ from pathlib import Path
 APP_ROOT = Path(__file__).resolve().parent.parent
 WEB_DIR = APP_ROOT / "web"
 
-_PRODUCT = "hengce-workbench"
-_NAME = "衡策经营数据工作台"
+_PRODUCT = "data-stats-workbench"
+_NAME = "数据统计工作台"
 _VERSION = "1.0.0"
 _RELEASED = ""
 _SCHEMA_VERSION = 1
@@ -34,14 +34,14 @@ APP_NAME = _NAME
 APP_VERSION = _VERSION
 APP_RELEASED = _RELEASED
 SCHEMA_VERSION = _SCHEMA_VERSION
-VERSION_DIR = Path(os.environ.get("HENGCE_VERSION_DIR") or APP_ROOT)
-INSTALL_ROOT = Path(os.environ["HENGCE_INSTALL_ROOT"]) if os.environ.get("HENGCE_INSTALL_ROOT") else None
+VERSION_DIR = Path(os.environ.get("DATASTATS_VERSION_DIR") or APP_ROOT)
+INSTALL_ROOT = Path(os.environ["DATASTATS_INSTALL_ROOT"]) if os.environ.get("DATASTATS_INSTALL_ROOT") else None
 IS_INSTALLED = bool(INSTALL_ROOT)
-PACKAGED = bool(os.environ.get("HENGCE_PACKAGED"))
+PACKAGED = bool(os.environ.get("DATASTATS_PACKAGED"))
 
 _DEFAULT_DATA_DIR = APP_ROOT / "data"
-DATA_DIR = Path(os.environ.get("HENGCE_DATA_DIR") or _DEFAULT_DATA_DIR)
-DB_PATH = DATA_DIR / "hengce.db"
+DATA_DIR = Path(os.environ.get("DATASTATS_DATA_DIR") or _DEFAULT_DATA_DIR)
+DB_PATH = DATA_DIR / "workbench.db"
 STAGING_DIR = DATA_DIR / "staging"
 BACKUP_DIR = DATA_DIR / "backup"
 LOG_DIR = DATA_DIR / "logs"
@@ -54,9 +54,9 @@ def configure(data_dir: str | Path | None = None) -> None:
     global DATA_DIR, DB_PATH, STAGING_DIR, BACKUP_DIR, LOG_DIR, REPORT_DIR, UPDATE_DIR
     if data_dir:
         DATA_DIR = Path(data_dir).expanduser().resolve()
-    elif os.environ.get("HENGCE_DATA_DIR"):
-        DATA_DIR = Path(os.environ["HENGCE_DATA_DIR"]).expanduser().resolve()
-    DB_PATH = DATA_DIR / "hengce.db"
+    elif os.environ.get("DATASTATS_DATA_DIR"):
+        DATA_DIR = Path(os.environ["DATASTATS_DATA_DIR"]).expanduser().resolve()
+    DB_PATH = DATA_DIR / "workbench.db"
     STAGING_DIR = DATA_DIR / "staging"
     BACKUP_DIR = DATA_DIR / "backup"
     LOG_DIR = DATA_DIR / "logs"

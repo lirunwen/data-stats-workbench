@@ -172,7 +172,9 @@ def dashboard():
     start = clean_text(request.args.get("start")) or None
     end = clean_text(request.args.get("end")) or None
     data = get_dashboard(preset, start, end)
-    return _ok(dashboard=data, options=records_service.get_filter_options())
+    # get_dashboard() 内部已经算过过滤选项，直接复用；不要再调一次。
+    options = data.pop("options", None) or records_service.get_filter_options()
+    return _ok(dashboard=data, options=options)
 
 
 # ---------------------------------------------------------------------------
@@ -376,7 +378,7 @@ def batch_error_archive(batch_id: str):
     archive = _io.BytesIO()
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zip_file:
         readme = (
-            f"衡策经营数据工作台 · 导入异常明细\n"
+            f"数据统计工作台 · 导入异常明细\n"
             f"批次：{batch_id}\n导入时间：{batch.get('created_at', '')}\n"
             f"新增：{batch.get('imported_rows', 0)}  更新：{batch.get('updated_rows', 0)}  "
             f"重复：{batch.get('duplicate_rows', 0)}  异常：{batch.get('invalid_rows', 0)}\n\n"
@@ -451,7 +453,7 @@ def create_backup():
         io.BytesIO(content),
         mimetype="application/x-sqlite3",
         as_attachment=True,
-        download_name=f"衡策数据备份_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db",
+        download_name=f"数据统计工作台数据备份_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db",
         max_age=0,
     )
 
@@ -459,10 +461,17 @@ def create_backup():
 @api.post("/maintenance/cleanup")
 def cleanup():
     import_service.cleanup_stale_sessions()
+    known_batches = {row[0] for row in db.get_db().execute("SELECT id FROM batches")}
+    now = datetime.now().timestamp()
     removed = 0
     for folder in config.REPORT_DIR.iterdir() if config.REPORT_DIR.exists() else []:
         try:
-            if folder.is_dir() and folder.stat().st_mtime < (datetime.now().timestamp() - 180 * 86400):
+            if not folder.is_dir():
+                continue
+            age = now - folder.stat().st_mtime
+            # 过期目录，或没有对应批次的孤儿目录。
+            # 孤儿目录留 1 小时宽限期，避免删掉正在进行的导入刚建好的目录。
+            if age > 180 * 86400 or (folder.name not in known_batches and age > 3600):
                 shutil.rmtree(folder, ignore_errors=True)
                 removed += 1
         except OSError:

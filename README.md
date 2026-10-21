@@ -1,8 +1,8 @@
-# 衡策 · 经营数据工作台
+# 数据统计工作台
 
 > 为办公室文员和财务文员准备的本地经营数据工作台：批量导入 Excel / Outlook 邮件，自动完成字段映射、校验、去重与汇总，并用清晰的仪表盘展示经营趋势。**全程离线，数据不出本机。**
 
-> **直接下载：** [Windows 11 x64 离线安装包](https://github.com/lirunwen/hengce-workbench/releases/download/v1.0.0/HengCeWorkbench-Windows-x64-v1.0.0.zip)（约 12 MB，内置 Python，无需联网安装）。文件同时保存在仓库 [downloads/](downloads/) 目录。解压后双击 `Start-HengCe.vbs`；需要桌面快捷方式时运行 `Install-HengCe.cmd`。校验值见 [downloads/SHA256SUMS.txt](downloads/SHA256SUMS.txt)。
+> **下载：** [Windows 11 x64 离线安装包](https://github.com/lirunwen/data-stats-workbench/releases/latest)（内置 Python，无需联网安装）。解压后双击 `Start-DataStats.vbs`；需要桌面快捷方式时运行 `Install-DataStats.cmd`。
 
 ![经营总览](docs/dashboard.png)
 
@@ -42,7 +42,7 @@
 - 每日自动备份（保留 14 份）+ 手动备份；升级前自动备份。
 - 单实例保护、端口自动回退、启动日志、磁盘清理。
 - 离线升级：本机校验升级包哈希，版本目录独立，自动数据库备份，重启生效，可回退。
-- 新版本启动失败时，可使用 `Recovery-HengCe.cmd` 紧急回退。
+- 新版本启动失败时，可使用 `Recovery-DataStats.cmd` 紧急回退。
 
 
 ### 界面一览
@@ -61,16 +61,16 @@
 
 ## 2. Windows 11 直接使用
 
-> 安装包已直接放在仓库 `downloads/` 目录；历史版本与完整发布记录见 [Releases](https://github.com/lirunwen/hengce-workbench/releases/latest)。校验值见 [downloads/SHA256SUMS.txt](downloads/SHA256SUMS.txt)。
+> 安装包与完整发布记录见 [Releases](https://github.com/lirunwen/data-stats-workbench/releases/latest)。
 
 ### 方式 A：便携运行
-1. 解压 `HengCeWorkbench-Windows-x64-v1.0.0.zip`（不要只复制压缩包中的部分文件）。
-2. 双击 `Start-HengCe.vbs`。
+1. 解压下载的 ZIP（不要只复制压缩包中的部分文件）。
+2. 双击 `Start-DataStats.vbs`。
 3. 首次启动会创建 `data\`，浏览器自动打开工作台。
 
 ### 方式 B：安装到本机
-1. 解压后双击 `Install-HengCe.cmd`。
-2. 程序复制到 `%LOCALAPPDATA%\HengCeWorkbench`，并创建桌面 / 开始菜单快捷方式。
+1. 解压后双击 `Install-DataStats.cmd`。
+2. 程序复制到 `%LOCALAPPDATA%\DataStatsWorkbench`，并创建桌面 / 开始菜单快捷方式。
 3. 不需要管理员权限，不需要安装 Python 或数据库。
 
 运行包内置 Python 3.12.10 与全部依赖，**目标电脑完全不需要联网**。
@@ -121,7 +121,7 @@
 
 ```text
 data/
-├─ hengce.db              SQLite 主数据库（业务记录 / 批次 / 设置 / 审计）
+├─ workbench.db              SQLite 主数据库（业务记录 / 批次 / 设置 / 审计）
 ├─ staging/               上传原文件与导入会话暂存（24 小时自动清理）
 ├─ reports/               批次异常明细 CSV
 ├─ backup/                每日自动备份 + 手动 / 升级前备份
@@ -130,11 +130,11 @@ data/
 ```
 
 - 便携运行：数据在程序目录的 `data\`。
-- 安装运行：数据在 `%LOCALAPPDATA%\HengCeWorkbench\data`。
+- 安装运行：数据在 `%LOCALAPPDATA%\DataStatsWorkbench\data`。
 - 升级只替换程序目录，不动数据目录。
 - 设置页可查看数据路径、立即备份、清理临时上传。
 
-> 备份是 SQLite 数据库文件。需要恢复时，请先退出工作台，将备份文件复制为 `data\hengce.db`（同时移除旧的 `hengce.db-wal` / `hengce.db-shm`），再启动。建议操作前再备份当前文件。
+> 备份是 SQLite 数据库文件。需要恢复时，请先退出工作台，将备份文件复制为 `data\workbench.db`（同时移除旧的 `workbench.db-wal` / `workbench.db-shm`），再启动。建议操作前再备份当前文件。
 
 ## 5. 开发与构建
 
@@ -186,8 +186,8 @@ python packaging/make_update.py \
 构建脚本会生成：
 
 ```text
-dist/HengCeWorkbench-Windows-x64-v<版本>.zip   # 可直接解压使用 / 安装
-dist/updates/HengCe-Update-v<版本>.zip         # 设置页 → 离线升级
+dist/DataStatsWorkbench-Windows-x64-v<版本>.zip   # 可直接解压使用 / 安装
+dist/updates/DataStats-Update-v<版本>.zip         # 设置页 → 离线升级
 ```
 
 完整构建与升级包格式见 [packaging/README.md](packaging/README.md)。

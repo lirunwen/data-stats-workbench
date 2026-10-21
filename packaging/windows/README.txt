@@ -1,18 +1,18 @@
-﻿衡策 · 经营数据工作台
+﻿数据统计工作台
 ======================================================================
 
 一、怎么打开
   1. 解压完整文件夹（请不要只复制其中一部分）。
-  2. 双击「Start-HengCe.vbs」即可在浏览器中打开。
+  2. 双击「Start-DataStats.vbs」即可在浏览器中打开。
      · 首次启动会自动创建 data 数据目录。
      · 程序只监听 127.0.0.1，同一局域网的其他人无法访问。
      · 无需联网，无需安装 Python、Node.js、数据库或任何运行库。
 
 二、安装到本机（可选）
-  双击「Install-HengCe.cmd」。
-  · 程序会复制到 %LOCALAPPDATA%\HengCeWorkbench。
+  双击「Install-DataStats.cmd」。
+  · 程序会复制到 %LOCALAPPDATA%\DataStatsWorkbench。
   · 会在桌面和开始菜单创建快捷方式，不需要管理员权限。
-  · 升级时数据目录保留在 %LOCALAPPDATA%\HengCeWorkbench\data。
+  · 升级时数据目录保留在 %LOCALAPPDATA%\DataStatsWorkbench\data。
 
 三、导入与操作
   打开「批量导入」：
@@ -31,8 +31,8 @@
 
 四、数据放在哪里
   · 便携运行：程序目录下的 data 文件夹。
-  · 安装到本机：%LOCALAPPDATA%\HengCeWorkbench\data。
-  · 主数据库文件：hengce.db（SQLite）。
+  · 安装到本机：%LOCALAPPDATA%\DataStatsWorkbench\data。
+  · 主数据库文件：workbench.db（SQLite）。
   · 「设置与数据安全」中可以查看路径、下载数据库备份、清理临时上传。
 
 五、升级
@@ -42,8 +42,8 @@
   4. 升级不会改动 data 数据目录，数据库迁移自动执行。
 
 六、常见问题
-  · 双击没有反应：运行「Diagnostics.cmd」查看缺失项；查看 data\logs\hengce.log。
-  · 升级后无法启动：运行「Recovery-HengCe.cmd」，选择之前的版本恢复启动。
+  · 双击没有反应：运行「Diagnostics.cmd」查看缺失项；查看 data\logs\workbench.log。
+  · 升级后无法启动：运行「Recovery-DataStats.cmd」，选择之前的版本恢复启动。
   · 想彻底停止后台服务：设置与数据安全 → 退出工作台。
   · 浏览器没有自动打开：手动访问窗口提示的 http://127.0.0.1:端口。
   · 邮件是 .pst / .ost：这是邮箱数据库，不直接读取。请在 Outlook 中把目标邮件另存为 .msg。

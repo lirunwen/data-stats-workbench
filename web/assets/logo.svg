@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 252 64">
   <rect x="4" y="4" width="56" height="56" rx="16" fill="#123B31"/>
   <path d="M20 22h24M22 32h20M25 42h14" stroke="#C9A45C" stroke-width="2.6" stroke-linecap="round" opacity=".75"/>
   <path d="M32 17v30" stroke="#F2F0E8" stroke-width="2.8" stroke-linecap="round"/>
   <circle cx="32" cy="32" r="4" fill="#123B31" stroke="#F2F0E8" stroke-width="2"/>
-  <text x="78" y="34" font-family="Microsoft YaHei, sans-serif" font-size="24" font-weight="700" fill="#123B31">衡策</text>
-  <text x="80" y="48" font-family="Microsoft YaHei, sans-serif" font-size="11" letter-spacing="1" fill="#708079">经营数据工作台</text>
+  <text x="76" y="32" font-family="Microsoft YaHei, sans-serif" font-size="22" font-weight="700" fill="#123B31">数据统计工作台</text>
+  <text x="78" y="47" font-family="Microsoft YaHei, sans-serif" font-size="10" letter-spacing="2" fill="#708079">DATA WORKBENCH</text>
 </svg>

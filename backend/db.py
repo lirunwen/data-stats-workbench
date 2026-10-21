@@ -255,7 +255,7 @@ def backup_database(reason: str = "manual", keep_auto: int = 12) -> Path:
     config.ensure_dirs()
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     safe_reason = "".join(ch for ch in reason if ch.isalnum() or ch in "-_") or "manual"
-    target = config.BACKUP_DIR / f"hengce-{safe_reason}-{stamp}.db"
+    target = config.BACKUP_DIR / f"workbench-{safe_reason}-{stamp}.db"
     source = connect()
     try:
         destination = sqlite3.connect(str(target))
@@ -268,8 +268,8 @@ def backup_database(reason: str = "manual", keep_auto: int = 12) -> Path:
         source.close()
     # 手动/升级前备份与每日备份分开保留，避免互相挤占。
     files = sorted(
-        [path for path in config.BACKUP_DIR.glob("hengce-*-*.db")
-         if not path.name.startswith("hengce-daily-")],
+        [path for path in config.BACKUP_DIR.glob("workbench-*-*.db")
+         if not path.name.startswith("workbench-daily-")],
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
@@ -284,7 +284,7 @@ def backup_database(reason: str = "manual", keep_auto: int = 12) -> Path:
 def daily_auto_backup() -> Path | None:
     """每天第一次启动时留一份轻量备份。"""
     config.ensure_dirs()
-    target = config.BACKUP_DIR / f"hengce-daily-{date.today().strftime('%Y%m%d')}.db"
+    target = config.BACKUP_DIR / f"workbench-daily-{date.today().strftime('%Y%m%d')}.db"
     if target.exists():
         return None
     try:
@@ -296,7 +296,7 @@ def daily_auto_backup() -> Path | None:
             destination.close()
             source.close()
         daily = sorted(
-            config.BACKUP_DIR.glob("hengce-daily-*.db"),
+            config.BACKUP_DIR.glob("workbench-daily-*.db"),
             key=lambda path: path.stat().st_mtime,
             reverse=True,
         )

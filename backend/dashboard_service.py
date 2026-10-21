@@ -74,30 +74,47 @@ def _trend(conn: Any, end_month: str) -> list[dict]:
     return result
 
 
-def _category_breakdown(conn: Any, start: str, end: str, direction: str, limit: int = 7) -> tuple[list[dict], int]:
+def _category_breakdown(conn: Any, start: str, end: str, limit: int = 7) -> dict[str, dict]:
+    """一次扫描同时算出收入与支出的类别构成。
+
+    原实现按方向各查一次，同一段日期范围被扫两遍；这里合并为一条
+    GROUP BY category, direction，方向拆分放到 Python 侧。
+    """
     rows = conn.execute(
-        """SELECT category, SUM(amount_cents) AS amount, COUNT(*) AS count
-           FROM records WHERE business_date BETWEEN ? AND ? AND direction = ?
-           GROUP BY category ORDER BY amount DESC""",
-        (start, end, direction),
+        """SELECT category, direction, SUM(amount_cents) AS amount, COUNT(*) AS count
+           FROM records WHERE business_date BETWEEN ? AND ? AND direction IN ('income', 'expense')
+           GROUP BY category, direction""",
+        (start, end),
     ).fetchall()
-    total = sum(int(row["amount"] or 0) for row in rows)
-    items = [
-        {"name": row["category"], "amount_cents": int(row["amount"] or 0), "count": int(row["count"] or 0)}
-        for row in rows
-    ]
-    if len(items) > limit:
-        rest = items[limit - 1:]
-        items = items[:limit - 1]
-        items.append({
-            "name": "其他类别",
-            "amount_cents": sum(item["amount_cents"] for item in rest),
-            "count": sum(item["count"] for item in rest),
-            "is_other": True,
+
+    buckets: dict[str, list[dict]] = {"income": [], "expense": []}
+    for row in rows:
+        direction = row["direction"]
+        if direction not in buckets:
+            continue
+        buckets[direction].append({
+            "name": row["category"],
+            "amount_cents": int(row["amount"] or 0),
+            "count": int(row["count"] or 0),
         })
-    for item in items:
-        item["share"] = round(item["amount_cents"] / total * 100, 1) if total else 0
-    return items, total
+
+    result: dict[str, dict] = {}
+    for direction, items in buckets.items():
+        items.sort(key=lambda item: item["amount_cents"], reverse=True)
+        total = sum(item["amount_cents"] for item in items)
+        if len(items) > limit:
+            rest = items[limit - 1:]
+            items = items[:limit - 1]
+            items.append({
+                "name": "其他类别",
+                "amount_cents": sum(item["amount_cents"] for item in rest),
+                "count": sum(item["count"] for item in rest),
+                "is_other": True,
+            })
+        for item in items:
+            item["share"] = round(item["amount_cents"] / total * 100, 1) if total else 0
+        result[direction] = {"items": items, "total_cents": total}
+    return result
 
 
 def _departments(conn: Any, start: str, end: str, limit: int = 7) -> list[dict]:
@@ -164,10 +181,16 @@ def _quality(conn: Any, start: str, end: str) -> dict:
 
 
 def _recent_batches(conn: Any, limit: int = 4) -> list[dict]:
+    # 原实现先查批次、再为每个批次单独查首个来源（1+N 条 SQL）；
+    # 这里用一次 LEFT JOIN 关联「每个批次 rowid 最小的来源」，一条语句取完。
     rows = conn.execute(
-        """SELECT id, status, source_count, total_rows, imported_rows, updated_rows,
-                  duplicate_rows, invalid_rows, warning_rows, created_at, is_demo
-           FROM batches ORDER BY created_at DESC LIMIT ?""",
+        """SELECT b.id, b.status, b.source_count, b.total_rows, b.imported_rows, b.updated_rows,
+                  b.duplicate_rows, b.invalid_rows, b.warning_rows, b.created_at, b.is_demo,
+                  s.file_name AS first_file, s.sheet_name AS first_sheet
+           FROM batches b
+           LEFT JOIN batch_sources s
+                  ON s.rowid = (SELECT MIN(rowid) FROM batch_sources WHERE batch_id = b.id)
+           ORDER BY b.created_at DESC LIMIT ?""",
         (limit,),
     ).fetchall()
     status_labels = {
@@ -176,10 +199,6 @@ def _recent_batches(conn: Any, limit: int = 4) -> list[dict]:
     }
     result = []
     for row in rows:
-        first_source = conn.execute(
-            "SELECT file_name, sheet_name FROM batch_sources WHERE batch_id = ? ORDER BY rowid LIMIT 1",
-            (row["id"],),
-        ).fetchone()
         result.append({
             "id": row["id"],
             "status": row["status"],
@@ -192,8 +211,8 @@ def _recent_batches(conn: Any, limit: int = 4) -> list[dict]:
             "invalid_rows": row["invalid_rows"],
             "created_at": row["created_at"],
             "is_demo": bool(row["is_demo"]),
-            "first_file": (first_source["file_name"] if first_source else ""),
-            "first_sheet": (first_source["sheet_name"] if first_source else ""),
+            "first_file": row["first_file"] or "",
+            "first_sheet": row["first_sheet"] or "",
         })
     return result
 
@@ -219,11 +238,15 @@ def get_dashboard(preset: str = "year", start: str | None = None, end: str | Non
         _kpi("count", "流水笔数", current["count"], previous["count"], is_money=False),
     ]
     trend = _trend(conn, period["end"][:7])
-    expense_categories, expense_total = _category_breakdown(conn, period["start"], period["end"], "expense")
-    income_categories, income_total = _category_breakdown(conn, period["start"], period["end"], "income")
+    breakdown = _category_breakdown(conn, period["start"], period["end"])
+    expense_categories = breakdown["expense"]["items"]
+    income_categories = breakdown["income"]["items"]
+    expense_total = breakdown["expense"]["total_cents"]
+    income_total = breakdown["income"]["total_cents"]
     departments = _departments(conn, period["start"], period["end"])
     quality = _quality(conn, period["start"], period["end"])
     recent = _recent_batches(conn)
+    # 过滤选项在此处只算一次，由调用方复用（原实现路由层会再算一遍）。
     options = get_filter_options()
     total_records = options["total"] or 0
     range_has_data = current["count"] > 0
@@ -272,4 +295,6 @@ def get_dashboard(preset: str = "year", start: str | None = None, end: str | Non
             "largest_record": largest_record,
         },
         "server_date": date.today().isoformat(),
+        # 由路由层取出后作为同级 options 返回，避免再调一次 get_filter_options()。
+        "options": options,
     }

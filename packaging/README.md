@@ -11,16 +11,16 @@
 ## 1. 最终用户拿到的结构
 
 ```text
-HengCeWorkbench\
-├─ Start-HengCe.vbs              静默启动（桌面快捷方式指向它）
-├─ Start-HengCe-Console.cmd      诊断启动（保留控制台）
-├─ Install-HengCe.cmd            复制到 %LOCALAPPDATA%，创建快捷方式
+DataStatsWorkbench\
+├─ Start-DataStats.vbs              静默启动（桌面快捷方式指向它）
+├─ Start-DataStats-Console.cmd      诊断启动（保留控制台）
+├─ Install-DataStats.cmd            复制到 %LOCALAPPDATA%，创建快捷方式
 ├─ Diagnostics.cmd               环境自检
-├─ Recovery-HengCe.cmd           新版本无法启动时紧急回退
+├─ Recovery-DataStats.cmd           新版本无法启动时紧急回退
 ├─ install.ps1                   安装逻辑（无需管理员权限）
 ├─ README.txt                    给文员的 Windows 使用说明
 ├─ THIRD_PARTY_NOTICES.txt       第三方组件许可
-├─ HengCe.ico
+├─ DataStats.ico
 ├─ launcher.py                   稳定启动器，不属于任何业务版本
 ├─ recovery.py                   紧急回退逻辑
 ├─ data\                         首次启动创建，升级不覆盖
@@ -81,13 +81,13 @@ python packaging/build_portable.py \
 产物：
 
 ```text
-dist/HengCeWorkbench-Windows-x64-v<version>.zip
-dist/build/HengCeWorkbench/                  # 可检查的未压缩目录
+dist/DataStatsWorkbench-Windows-x64-v<version>.zip
+dist/build/DataStatsWorkbench/                  # 可检查的未压缩目录
 ```
 
 建议在 Windows 11 目标机上完成一次发布验收：
 
-- 双击 `Start-HengCe.vbs`，Edge / Chrome 自动打开；
+- 双击 `Start-DataStats.vbs`，Edge / Chrome 自动打开；
 - 「Diagnostics.cmd」中的自检全部通过；
 - 导入 `.xlsx`、`.msg`（含 Excel 附件）测试；
 - 在设置页做一次手动备份；
@@ -102,8 +102,8 @@ dist/build/HengCeWorkbench/                  # 可检查的未压缩目录
 
 ```json
 {
-  "product": "hengce-workbench",
-  "name": "衡策经营数据工作台",
+  "product": "data-stats-workbench",
+  "name": "数据统计工作台",
   "version": "1.0.1",
   "released": "2026-11-01",
   "schema_version": 1,
@@ -127,7 +127,7 @@ python packaging/make_update.py \
 产物：
 
 ```text
-dist/updates/HengCe-Update-v1.0.1.zip
+dist/updates/DataStats-Update-v1.0.1.zip
 ```
 
 升级包结构：
@@ -147,7 +147,7 @@ payload/
 ```json
 {
   "format": 1,
-  "product": "hengce-workbench",
+  "product": "data-stats-workbench",
   "version": "1.0.1",
   "min_from": "1.0.0",
   "released": "2026-11-01",
@@ -172,7 +172,7 @@ payload/
 
 | 检查 / 保障 | 实现 |
 | --- | --- |
-| 产品归属 | `update.json.product` 必须等于 `hengce-workbench` |
+| 产品归属 | `update.json.product` 必须等于 `data-stats-workbench` |
 | 防降级 | 目标版本必须高于当前运行版本 |
 | 来源兼容 | 当前版本必须 ≥ `min_from` |
 | 文件完整性 | 清单记录每个文件的 size + SHA-256，逐文件校验 |
@@ -180,7 +180,7 @@ payload/
 | 防损坏 | ZIP 校验 + 全量解压到临时目录后再切换 |
 | 防坏代码 | `compileall` 校验 `app.py` 与 `backend/` 语法 |
 | 防丢数据 | 切换版本前自动 SQLite 在线备份 |
-| 可回退 | 旧版本目录保留；设置页可切换；`Recovery-HengCe.cmd` 可在无法启动时回退 |
+| 可回退 | 旧版本目录保留；设置页可切换；`Recovery-DataStats.cmd` 可在无法启动时回退 |
 | 防重复安装 | 相同版本目录已存在时拒绝覆盖 |
 | 防并发切换 | 有 `active.txt` 待生效版本时，拒绝继续安装 |
 
@@ -192,7 +192,7 @@ payload/
 当新版本安装后无法启动（例如运行时环境被破坏、依赖缺失），用户仍可使用根目录的：
 
 ```text
-Recovery-HengCe.cmd
+Recovery-DataStats.cmd
 ```
 
 它会：
@@ -200,7 +200,7 @@ Recovery-HengCe.cmd
 1. 检测工作台是否仍在运行；
 2. 列出 `program/versions` 下的所有版本；
 3. 默认选择“不是当前启动版本”的最新版本；
-4. 备份数据库到 `data/backup/hengce-recovery-*.db`；
+4. 备份数据库到 `data/backup/workbench-recovery-*.db`；
 5. 写入新的 `active.txt` 并尝试重新启动。
 
 若数据库已发生不可逆结构升级，回退前请使用 `data/backup/` 中的升级前数据库备份。
@@ -217,7 +217,7 @@ Recovery-HengCe.cmd
 | 运行方式 | 数据目录 |
 | --- | --- |
 | 便携运行 | `<程序目录>\data` |
-| 安装运行 | `%LOCALAPPDATA%\HengCeWorkbench\data` |
+| 安装运行 | `%LOCALAPPDATA%\DataStatsWorkbench\data` |
 
 升级只替换 `program/versions`，不会覆盖 `data`。
 安装脚本使用 robocopy 时显式排除 `data`，因此重复运行安装脚本不会清掉业务数据。

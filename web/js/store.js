@@ -45,7 +45,7 @@ export function updateShellCounts() {
   const badge = document.getElementById('navRecordCount');
   if (badge) badge.textContent = count > 999 ? '999+' : String(count);
   const version = document.getElementById('sidebarVersion');
-  if (version && state.app) version.textContent = `衡策 v${state.app.version}`;
+  if (version && state.app) version.textContent = `数据统计工作台 v${state.app.version}`;
 }
 
 export function getCategoryNames() {

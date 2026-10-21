@@ -1064,20 +1064,57 @@ def validation_csv(validation: dict) -> bytes:
     return ("\ufeff" + buffer.getvalue()).encode("utf-8")
 
 
-def write_batch_report(batch_id: str, source: dict, records: list[dict]) -> str:
-    folder = config.REPORT_DIR / batch_id
-    folder.mkdir(parents=True, exist_ok=True)
-    target = folder / f"{source['id']}.csv"
+def _report_rel_path(batch_id: str, source_id: str) -> str:
+    """异常明细相对数据目录的路径（存库用）。"""
+    return str((config.REPORT_DIR / batch_id / f"{source_id}.csv").relative_to(config.DATA_DIR))
+
+
+def render_batch_report(source: dict, records: list[dict]) -> bytes:
+    """在内存中生成异常明细 CSV。
+
+    写入磁盘由调用方在事务提交后完成：事务内做文件 I/O 会拉长写锁持有时间，
+    且回滚时已落盘的文件不会跟着回滚，会留下没有批次归属的孤儿报告。
+    只有表头（没有异常行）时返回空 bytes，调用方据此决定不生成文件。
+    """
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\r\n")
     writer.writerow(_REPORT_HEADERS)
+    written = 0
     item = {"source": source, "records": records}
     for row in _report_rows([item]):
         writer.writerow(row)
-    if len(buffer.getvalue().splitlines()) <= 1:
-        return ""
-    target.write_bytes(("\ufeff" + buffer.getvalue()).encode("utf-8"))
+        written += 1
+    if not written:
+        return b""
+    return ("\ufeff" + buffer.getvalue()).encode("utf-8")
+
+
+def write_report_file(batch_id: str, source_id: str, payload: bytes) -> str:
+    """把已渲染好的报告原子写入磁盘，返回存库用的相对路径。"""
+    folder = config.REPORT_DIR / batch_id
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f"{source_id}.csv"
+    temp = folder / f".{source_id}.csv.tmp"
+    temp.write_bytes(payload)
+    os.replace(temp, target)
     return str(target.relative_to(config.DATA_DIR))
+
+
+def _flush_reports(batch_id: str, pending: list[tuple[str, bytes]]) -> None:
+    """事务提交后落盘。写失败时清空库里的指针，避免界面给出失效的下载链接。"""
+    for source_id, payload in pending:
+        try:
+            write_report_file(batch_id, source_id, payload)
+        except Exception:
+            log.exception("写入异常明细报告失败：%s / %s", batch_id, source_id)
+            try:
+                with db.transaction() as tx:
+                    tx.execute(
+                        "UPDATE batch_sources SET error_report = '' WHERE batch_id = ? AND source_id = ?",
+                        (batch_id, source_id),
+                    )
+            except Exception:
+                log.exception("回滚报告指针失败：%s / %s", batch_id, source_id)
 
 
 # ---------------------------------------------------------------------------
@@ -1196,6 +1233,7 @@ def commit_import(token: str, selections: list[dict], duplicate_policy: str = "s
         created_at = now_iso()
         imported = updated = 0
         batch_sources = []
+        pending_reports: list[tuple[str, bytes]] = []
         try:
             with db.transaction() as tx:
                 tx.execute(
@@ -1293,8 +1331,14 @@ def commit_import(token: str, selections: list[dict], duplicate_policy: str = "s
                                 "message": record["issues"][0]["message"] if record["issues"] else "",
                             })
                     # 为异常/重复/提示行落一份完整 CSV，历史记录中可下载。
+                    # 这里只渲染到内存，落盘放到事务提交之后（见 _flush_reports）。
                     abnormal = [r for r in item["records"] if r["status"] != "valid"]
-                    error_report = write_batch_report(batch_id, source, item["records"]) if abnormal else ""
+                    error_report = ""
+                    if abnormal:
+                        report_payload = render_batch_report(source, item["records"])
+                        if report_payload:
+                            error_report = _report_rel_path(batch_id, source["id"])
+                            pending_reports.append((source["id"], report_payload))
                     tx.execute(
                         """INSERT INTO batch_sources(id, batch_id, source_id, file_name, file_type,
                                sheet_name, email_subject, email_from, email_date, presence, header_row,
@@ -1335,6 +1379,9 @@ def commit_import(token: str, selections: list[dict], duplicate_policy: str = "s
         except Exception as exc:
             log.exception("提交导入失败")
             raise AppError(f"保存导入数据失败：{exc}", 500, "commit_failed") from exc
+
+        # 事务已提交，此时再落盘异常明细；写失败只会清空指针，不影响已入库的数据。
+        _flush_reports(batch_id, pending_reports)
 
         for item in validation["sources"]:
             _upsert_mapping_profile(item["source"], item["mapping"])

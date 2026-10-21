@@ -44,7 +44,7 @@ let booted = false;
 function setShellRoute(name, route) {
   document.getElementById('pageTitle').textContent = route.title;
   document.getElementById('pageEyebrow').textContent = route.eyebrow;
-  document.title = `${route.title} · 衡策经营数据工作台`;
+  document.title = `${route.title} · 数据统计工作台`;
   document.querySelectorAll('[data-nav]').forEach((link) => {
     const active = link.dataset.nav === name;
     link.classList.toggle('active', active);
@@ -181,7 +181,7 @@ async function boot() {
         <div class="empty-icon">${icon('alert', 'icon-xl')}</div>
         <h2>工作台暂时无法打开</h2>
         <p>${escapeHtml(error?.message || '本地数据服务没有响应。')}</p>
-        <p class="text-faint" style="margin-top:8px">请确认程序窗口仍在运行。如果问题持续，请查看 data/logs/hengce.log。</p>
+        <p class="text-faint" style="margin-top:8px">请确认程序窗口仍在运行。如果问题持续，请查看 data/logs/workbench.log。</p>
         <button class="btn btn-primary" style="margin-top:18px" data-action="reload-page">${icon('refresh')}重新加载</button>
       </div>`;
     if (bootScreen.isConnected) window.setTimeout(() => bootScreen.remove(), 450);

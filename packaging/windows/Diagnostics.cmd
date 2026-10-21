@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-echo HengCe Workbench - local diagnostics
+echo DataStats Workbench - local diagnostics
 echo.
 if not exist "%~dp0runtime\python\python.exe" (
   echo [ERROR] runtime\python\python.exe not found

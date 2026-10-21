@@ -1,5 +1,5 @@
 /* ==========================================================================
-   衡策 · 经营数据工作台
+   数据统计工作台
    本地离线样式表：无 Web Font、无 CDN、无外部图片
    ========================================================================== */
 
@@ -115,7 +115,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   background: var(--green-900); color: #f3f0e6; font-size: 27px; font-weight: 700;
   box-shadow: 0 16px 36px rgba(18, 59, 49, .22);
 }
-.boot-name { margin-top: 18px; font-size: 19px; font-weight: 700; letter-spacing: .22em; }
+.boot-name { margin-top: 18px; font-size: 16px; font-weight: 700; letter-spacing: .1em; }
 .boot-line { width: 126px; height: 2px; margin-top: 20px; overflow: hidden; border-radius: 2px; background: var(--line); }
 .boot-line span { display: block; width: 44%; height: 100%; border-radius: 2px; background: var(--green-700); animation: boot-slide 1.15s var(--ease) infinite; }
 .boot-screen p { margin-top: 14px; font-size: 12px; color: var(--muted); letter-spacing: .06em; }
@@ -146,7 +146,7 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   font-size: 21px; font-weight: 700;
 }
 .brand-copy { display: flex; flex-direction: column; line-height: 1.16; }
-.brand-copy strong { font-size: 19px; letter-spacing: .2em; font-weight: 700; }
+.brand-copy strong { font-size: 15px; letter-spacing: .02em; font-weight: 700; }
 .brand-copy small { margin-top: 5px; font-size: 10px; letter-spacing: .18em; color: #9db3a9; }
 .side-nav { margin-top: 36px; display: flex; flex-direction: column; gap: 4px; }
 .nav-caption {
