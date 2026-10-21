@@ -2,7 +2,8 @@
 
 > 为办公室文员和财务文员准备的本地经营数据工作台：批量导入 Excel / Outlook 邮件，自动完成字段映射、校验、去重与汇总，并用清晰的仪表盘展示经营趋势。**全程离线，数据不出本机。**
 
-> **下载：** [Windows 11 x64 离线安装包](https://github.com/lirunwen/data-stats-workbench/releases/latest)（内置 Python，无需联网安装）。解压后双击 `Start-DataStats.vbs`；需要桌面快捷方式时运行 `Install-DataStats.cmd`。
+> **下载：** [Windows 11 x64 离线包](https://github.com/lirunwen/data-stats-workbench/releases/download/v1.1.0/DataStatsWorkbench-Windows-x64-v1.1.0.zip)（内置 Python，解压即用，无需联网安装）。
+> 安装、启动、迁移与卸载步骤见 **[用户指南](docs/用户指南.md)**；历史版本见 [Releases](https://github.com/lirunwen/data-stats-workbench/releases)。
 
 ![经营总览](docs/dashboard.png)
 
@@ -62,6 +63,7 @@
 ## 2. Windows 11 直接使用
 
 > 安装包与完整发布记录见 [Releases](https://github.com/lirunwen/data-stats-workbench/releases/latest)。
+> 完整步骤（含系统要求、FAQ、卸载、从 v1.0.0 迁移）见 **[docs/用户指南.md](docs/用户指南.md)**。
 
 ### 方式 A：便携运行
 1. 解压下载的 ZIP（不要只复制压缩包中的部分文件）。
